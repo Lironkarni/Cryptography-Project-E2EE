@@ -1,173 +1,174 @@
-# פרוטוקול העברת הודעות מוצפנות מקצה לקצה (EE2E)
-**מאת לירון קרני ואיתן קוט**
+# End-to-End Encrypted Messaging Protocol (EE2E)
+**By Liron Karni and Eitan Kot**
 
 ---
 
-## הקדמה
-הפרוטוקול המוצע נועד להבטיח תקשורת מאובטחת ואמינה בין לקוחות בסביבה שבה האיומים על פרטיות וסודיות המידע הולכים וגוברים. הוא תוכנן במיוחד כדי להגן על נתונים אישיים, להבטיח את הזהות של המשתתפים בתקשורת, ולאפשר החלפה בטוחה של מפתחות הצפנה בין לקוחות.
+## Introduction
+The proposed protocol aims to ensure secure and reliable communication between clients in an environment where threats to privacy and data confidentiality are increasing. It is specifically designed to protect personal data, ensure the identity of communication participants, and allow for the secure exchange of encryption keys between clients.
 
 ---
 
-## מטרת הפרוטוקול
-המטרה העיקרית של הפרוטוקול היא להקים ערוץ תקשורת מאובטח בין לקוחות באמצעות טכניקות קריפטוגרפיות מתקדמות. הפרוטוקול מוודא שפרטי ההתקשרות מוגנים מפני גורמים עוינים (MITM), תוך שמירה על שלמות המידע ויכולת אימות הדדית של זהות המשתתפים.
+## Protocol Objective
+The primary goal of the protocol is to establish a secure communication channel between clients using advanced cryptographic techniques. The protocol ensures that communication details are protected from adversaries (MITM), while maintaining data integrity and mutual authentication of participant identities.
 
 ---
 
-## חשיבות הפרוטוקול
-- **שמירה על פרטיות וסודיות:** הפרוטוקול משתמש במנגנוני הצפנה חזקים (AES-256, RSA) כדי למנוע מגורמים לא מורשים לגשת לתוכן ההודעות.
-- **אימות זהות המשתתפים:** השימוש בחתימות דיגיטליות וב-HMAC מאפשר לוודא שכל משתתף בתקשורת הוא אכן זה שהוא טוען להיות.
-- **עמידה בפני התקפות:** הפרוטוקול עמיד בפני התקפות נפוצות כמו התקפת אדם במרכז (MITM) או זיוף הודעות.
-- **עבודה בתנאי אי-חיבור:** במידה ואחד המשתתפים אינו מחובר, השרת שומר את ההודעות עד שהמשתתף יתחבר.
+## Protocol Importance
+- **Privacy and Confidentiality:** Utilizes strong encryption mechanisms (AES-256, RSA) to prevent unauthorized access to message content.
+- **Participant Identity Verification:** Digital signatures and HMAC ensure that each participant is who they claim to be.
+- **Resistance to Attacks:** Protects against common attacks like Man-in-the-Middle (MITM) and message forgery.
+- **Offline Support:** If a participant is offline, the server stores messages until the participant reconnects.
 
 ---
 
-## פעולות מרכזיות בפרוטוקול
-- **רישום ואימות:** הלקוח מבצע רישום מאובטח לשרת, כולל יצירת מפתחות קריפטוגרפיים ואימות זהות באמצעות OTP.
-- **החלפת מפתחות:** תהליך מובנה לאבטחת העברת מפתחות ההצפנה בין הלקוחות, תוך אימות זהותם.
-- **שליחת הודעות:** הצפנה ושמירה על שלמות ההודעה באמצעות HMAC והעברת ההודעות דרך שרת מאובטח.
-- **שליחת אישורים:** מנגנון מובנה לשליחת אישור על קבלת ההודעה, כולל אימות הדדי.
+## Key Actions in the Protocol
+- **Registration and Authentication:** Secure client registration with the server, including cryptographic key generation and identity verification using OTP.
+- **Key Exchange:** Structured process for securely transferring encryption keys between clients with identity verification.
+- **Message Sending:** Encrypting messages, maintaining message integrity using HMAC, and transmitting via a secure server.
+- **Acknowledgment Sending:** Built-in mechanism for acknowledgment delivery, including mutual verification.
 
-באמצעות הפרוטוקול, ניתן להבטיח שהתקשורת תתבצע בסביבה מאובטחת ומוגנת מפני איומים אפשריים, תוך שמירה על שקיפות ותאימות למשתמשים.
+With this protocol, communication is guaranteed to occur in a secure environment protected from potential threats while ensuring transparency and compatibility for users.
 
 ---
 
-## שלב 1: רישום לקוחות ואימות ראשוני
+## Step 1: Client Registration and Initial Authentication
 
-### 1.1 בקשת הרשמה
-- הלקוח שולח בקשת הרשמה לשרת יחד עם מספר הטלפון שלו.
+### 1.1 Registration Request
+- The client sends a registration request to the server along with their phone number.
 
-### 1.2 שליחת OTP
-- השרת שולח ללקוח קוד חד-פעמי (OTP) בן 6 ספרות דרך ערוץ בטוח (SMS).
-- ה-OTP תקף ל-5 דקות בלבד.
+### 1.2 Sending OTP
+- The server sends a one-time password (OTP) to the client via a secure channel (SMS).
+- The OTP is valid for 5 minutes only.
 
-### 1.3 יצירת מפתחות בצד הלקוח
-- כל לקוח יוצר זוג מפתחות RSA:
-  - מפתח פרטי וציבורי נשמרים מקומית.
-  - מפתח ציבורי, שישלח לשרת, מפתח פרטי, בעזרתו יפענח ויחתום.
+### 1.3 Generating Keys on the Client Side
+- Each client generates an RSA key pair:
+  - The private and public keys are stored locally.
+  - The public key is sent to the server, and the private key is used for decryption and signing.
 
-### 1.4 יצירת Salt משותף
-- השרת והלקוח יוצרים Salt זהה באמצעות HMAC:
+### 1.4 Creating a Shared Salt
+- The server and client generate an identical Salt using HMAC:
   - `HMAC-SHA256(PhoneNumber, OTP) = Salt`
 
-### 1.5 יצירת מפתח קריפטוגרפי חד פעמי (K_temp)
-- הלקוח והשרת יוצרים את אותו (K_temp) באמצעות KDF:
+### 1.5 Generating a Temporary Cryptographic Key (K_temp)
+- The client and server generate the same `K_temp` using KDF:
   - `PBKDF2(OTP, Salt, Iterations, KeyLength) = K_temp`
 
-### 1.6 שליחת מפתח ציבורי ואימות
-- הלקוח:
-  1. מחשב חתימה דיגיטלית על המפתח הציבורי שלו עם K_temp באמצעות HMAC:
+### 1.6 Sending Public Key and Verification
+- The client:
+  1. Computes a digital signature for their public key using `K_temp` and HMAC:
      - `HMAC-SHA256(PublicKey, K_temp) = Signature`
-  2. שולח לשרת את:
+  2. Sends the following to the server:
      - Public Key
      - Signature
 
-- השרת:
-  1. מחשב את החתימה Public Key של הלקוח באופן עצמאי.
-  2. משווה את החתימה עם זו שהתקבלה מהלקוח.
-  3. אם יש התאמה, ולא עברו 5 דקות משליחת ה-OTP, המפתח הציבורי של הלקוח נשמר בטבלה עם המזהה של הלקוח (מספר הטלפון).
+- The server:
+  1. Independently computes the signature for the client's public key.
+  2. Compares the computed signature with the received one.
+  3. If the signatures match and the OTP is within the 5-minute validity, the client's public key is stored in a table with their identifier (phone number).
 
 ---
 
-## שלב 2: החלפת מפתחות בין לקוחות A ו-B
+## Step 2: Key Exchange Between Clients A and B
 
-### 2.1 בקשת תחילת שיחה חדשה
-- לקוח A מודיע לשרת שהוא רוצה להתחיל תקשורת עם לקוח B.
+### 2.1 Initiating a New Session Request
+- Client A informs the server they wish to initiate communication with Client B.
 
-### 2.2 אישור זמינות של לקוח B
-- השרת מוודא שלקוח B קיים.
+### 2.2 Verifying Client B's Availability
+- The server verifies that Client B exists and is available.
 
-### 2.3 השרת מעביר ללקוח A את המפתח הציבורי של לקוח B
-- השרת:
-  1. מפעיל SHA-256 על המפתח הציבורי של לקוח B ואז מצפין עם ה-Private Key שלו (של השרת) על מנת ליצור חתימה.
-  2. שולח ללקוח A:
-     - Public Key של לקוח B.
-     - Signature – החתימה שיצר.
+### 2.3 Transmitting Client B's Public Key to Client A
+- The server:
+  1. Applies SHA-256 to Client B's public key and encrypts it using the server's private key to create a signature.
+  2. Sends the following to Client A:
+     - Public Key of Client B.
+     - Signature created by the server.
 
-### 2.4 אימות המפתח הציבורי שנשלח ללקוח המעוניין בתקשורת
-- לקוח A:
-  1. מפענח את החתימה באמצעות המפתח הציבורי של השרת.
-  2. מפעיל SHA-256 על המפתח הציבורי שהשרת שלח ומשווה עם החתימה.
-  3. אם יש התאמה, המפתח מאומת ולקוח A שומר אותו.
+### 2.4 Verifying the Public Key Sent to Client A
+- Client A:
+  1. Decrypts the signature using the server's public key.
+  2. Applies SHA-256 to the public key received from the server and compares it to the decrypted signature.
+  3. If they match, the key is verified and stored.
 
-### 2.5 יצירת מפתח סימטרי ושילוב חתימה
-- לקוח A:
-  1. יוצר מפתח סימטרי אקראי K.
-  2. מצפין את K בשני שלבים:
-     - פעם ראשונה עם Public Key של B.
-     - פעם שנייה מפעיל על K פונקציית ריבוב SHA-256 ומצפין עם ה-Private Key שלו (של A) – על מנת ליצור חתימה דיגיטלית (Signature).
-  3. שולח לשרת:
-     - K המפתח הסימטרי מוצפן במפתח הציבורי של B.
-     - Signature.
+### 2.5 Generating a Symmetric Key and Signature
+- Client A:
+  1. Generates a random symmetric key `K`.
+  2. Encrypts `K` in two steps:
+     - First, with Client B's public key.
+     - Second, applies a SHA-256 hash to `K` and encrypts it with Client A's private key to create a digital signature.
+  3. Sends to the server:
+     - The symmetric key `K` encrypted with Client B's public key.
+     - The digital signature.
 
-### 2.6 השרת
-- מפעיל SHA-256 על המפתח הציבורי של לקוח A ואז מצפין עם ה-Private Key שלו (של השרת).
+### 2.6 Server Actions
+- The server:
+  - Applies SHA-256 to Client A's public key and encrypts it using the server's private key.
 
-### 2.7 העברת המפתח הסימטרי והמפתח הציבורי של לקוח A ללקוח B
-- השרת מעביר את המפתח הסימטרי המוצפן ואת החתימה שקיבל מלקוח A ללקוח B, ומצרף את המפתח הציבורי של לקוח A ואת החתימה שיצר.
+### 2.7 Transmitting the Symmetric Key and Public Key of Client A to Client B
+- The server sends to Client B:
+  - The encrypted symmetric key and signature received from Client A.
+  - Client A's public key and the signature generated by the server.
 
-### 2.8 אימות המפתח הציבורי שנשלח ללקוח B
-- לקוח B:
-  1. מפענח את החתימה באמצעות המפתח הציבורי של השרת.
-  2. מפעיל SHA-256 על המפתח הציבורי שהשרת שלח ומשווה עם החתימה.
-  3. אם יש התאמה, המפתח הציבורי מאומת והלקוח שומר אותו.
+### 2.8 Verifying the Public Key Sent to Client B
+- Client B:
+  1. Decrypts the signature using the server's public key.
+  2. Applies SHA-256 to the public key received from the server and compares it to the decrypted signature.
+  3. If they match, the public key is verified and stored.
 
-### 2.9 פענוח ואימות המפתח הסימטרי
-- לקוח B:
-  1. מפענח את המפתח הסימטרי המוצפן באמצעות המפתח הפרטי שלו (של B).
-  2. מפעיל על K פונקציית ריבוב SHA-256, מפענח את החתימה באמצעות המפתח הציבורי של A ומשווה ביניהם לאימות.
-  3. אם האימות מצליח, המפתח הסימטרי נשמר בקובץ חיצוני.
+### 2.9 Decrypting and Verifying the Symmetric Key
+- Client B:
+  1. Decrypts the encrypted symmetric key using their private key.
+  2. Applies SHA-256 to `K`, decrypts the signature using Client A's public key, and compares the results for verification.
+  3. If verification is successful, the symmetric key is stored in an external file.
 
 ---
 
-## שלב 3: שליחת הודעות
+## Step 3: Sending Messages
 
-### 3.1 הצפנת ההודעה
-- לקוח A:
-  1. כותב הודעה M.
-  2. מצפין את M עם המפתח הסימטרי באמצעות AES-256.
-  3. מחשב HMAC-SHA256 מהמפתח הסימטרי ומ-M.
-  4. יוצר IV חדש.
+### 3.1 Encrypting the Message
+- Client A:
+  1. Writes a message `M`.
+  2. Encrypts `M` using the symmetric key with AES-256.
+  3. Computes `HMAC-SHA256` using the symmetric key and `M`.
+  4. Generates a new `IV`.
 
-### 3.2 שליחת ההודעה
-- הלקוח:
-  שולח לשרת:
-  - `M_encrypted`: ההודעה המוצפנת.
-  - `HMAC`: החתימה על ההודעה.
+### 3.2 Sending the Message
+- The client sends to the server:
+  - `M_encrypted`: The encrypted message.
+  - `HMAC`: The message signature.
   - `IV`.
 
-- השרת:
-  - מקבל את ההודעה ללא יכולת לפענחה.
-  - בודק שלקוח B מחובר ומעביר את ההודעה ללקוח B ללא שינוי.
-  - אם לקוח B לא מחובר, השרת שומר את ההודעה בטבלה עד שהלקוח יתחבר.
+- The server:
+  - Receives the message but cannot decrypt it.
+  - Checks if Client B is connected and forwards the message to Client B without changes.
+  - If Client B is not connected, the server stores the message in a table until the client connects.
 
-### 3.3 פענוח ואימות בצד לקוח B
-- לקוח B:
-  1. מפענח את `M_encrypted` עם המפתח הסימטרי וה-IV.
-  2. מחשב HMAC ומשווה לערך שהתקבל.
-  3. אם יש התאמה, ההודעה מאומתת ונקראת.
+### 3.3 Decrypting and Verifying the Message on Client B
+- Client B:
+  1. Decrypts `M_encrypted` using the symmetric key and the `IV`.
+  2. Computes `HMAC` and compares it to the received value.
+  3. If the values match, the message is verified and read.
 
 ---
 
-## שלב 4: שליחת אישור (ACK)
+## Step 4: Sending an Acknowledgment (ACK)
 
-### 4.1 יצירת ACK
-- לקוח B:
-  1. יוצר הודעת אישור.
-  2. יוצר חתימה עם HMAC-SHA256 על ה-ACK עם המפתח הסימטרי.
+### 4.1 Creating the ACK
+- Client B:
+  1. Creates an acknowledgment message (`ACK`).
+  2. Signs the `ACK` using `HMAC-SHA256` with the symmetric key.
 
-### 4.2 שליחת ה-ACK לשרת
-- הלקוח שולח לשרת את ה-ACK והחתימה.
+### 4.2 Sending the ACK to the Server
+- The client sends the `ACK` and its signature to the server.
 
-### 4.3 העברת ה-ACK ללקוח A
-- השרת מעביר את ה-ACK והחתימה ללקוח A.
+### 4.3 Forwarding the ACK to Client A
+- The server forwards the `ACK` and its signature to Client A.
 
-### 4.4 אימות ה-ACK
-- לקוח A:
-  1. יוצר חתימה עם HMAC-SHA256 על ה-ACK שקיבל עם המפתח הסימטרי.
-  2. משווה את החתימה שהוא יצר עם החתימה שנשלחה אליו.
-  3. אם יש התאמה, האישור מתקבל.
-  
-     ---
+### 4.4 Verifying the ACK
+- Client A:
+  1. Creates a signature for the received `ACK` using `HMAC-SHA256` and the symmetric key.
+  2. Compares the generated signature with the received one.
+  3. If the signatures match, the acknowledgment is accepted.
+
+---
 
 
-     
